@@ -1,4 +1,4 @@
-<img width="581" height="572" alt="image" src="https://github.com/user-attachments/assets/0a876129-614f-4427-a7d5-93ae3c1705f9" /># 🚀 DevLog - The Social Network for Developers
+# 🚀 DevLog - The Social Network for Developers
 
 ![MERN Stack](https://img.shields.io/badge/MERN-Stack-000000?style=for-the-badge&logo=mongodb&logoColor=green)
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
