@@ -34,4 +34,34 @@ const getProjects = async (req, res) => {
     res.json(projects);
 };
 
-module.exports = { createProject, getProjects };
+// @desc    Like or Unlike a project
+// @route   PUT /api/projects/like/:id
+// @access  Private
+const likeProject = async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.id);
+        
+        if (!project) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+
+        // Check if project has already been liked by this user
+        if (project.likes.includes(req.user.id)) {
+            // Unlike: Remove user from likes array
+            // Filter out the current user's ID
+            project.likes = project.likes.filter(
+                (id) => id.toString() !== req.user.id
+            );
+        } else {
+            // Like: Add user to likes array
+            project.likes.push(req.user.id);
+        }
+
+        await project.save();
+        res.json(project.likes); // Return the updated likes array
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { createProject, getProjects, likeProject };

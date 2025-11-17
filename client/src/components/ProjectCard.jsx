@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
 import { Link } from 'react-router-dom';
+import CodeBlock from './CodeBlock';
 
 const ProjectCard = ({ project }) => {
   // Get current user from local storage
@@ -11,6 +12,40 @@ const ProjectCard = ({ project }) => {
   // Note: We use 'some' or 'includes' depending on if the ID is stored as string or object
   const isFollowingInitially = currentUser?.following?.includes(project.creator._id);
   const [followed, setFollowed] = useState(isFollowingInitially);
+
+  // --- LIKE LOGIC ---
+  //  State for likes count and status
+  const [likes, setLikes] = useState(project.likes || []);
+  const [isLiked, setIsLiked] = useState(project.likes?.includes(currentUser?._id));
+
+  const handleLike = async () => {
+    if (!currentUser) return alert("Please login to like projects");
+
+    // Optimistic UI Update (Change color immediately before server responds)
+    const previousLikes = [...likes];
+    const previousStatus = isLiked;
+
+    if (isLiked) {
+        setLikes(likes.filter(id => id !== currentUser._id));
+        setIsLiked(false);
+    } else {
+        setLikes([...likes, currentUser._id]);
+        setIsLiked(true);
+    }
+
+    try {
+        const res = await axios.put(`http://localhost:5000/api/projects/like/${project._id}`, {}, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        // Sync with server response to be safe
+        setLikes(res.data); 
+    } catch (error) {
+        // Revert if error
+        setLikes(previousLikes);
+        setIsLiked(previousStatus);
+        console.error(error);
+    }
+  };
 
   // Chat and Comments State
   const [showChat, setShowChat] = useState(false);
@@ -90,24 +125,24 @@ const ProjectCard = ({ project }) => {
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-6 hover:shadow-lg transition border-l-4 border-green-500">
-      <div className="flex justify-between items-start">
-        <div>
-            <h3 className="text-2xl font-bold text-gray-800">{project.title}</h3>
-            <div className="flex items-center gap-2 mb-2">
-                <p className="text-sm text-gray-500">
-                  by <Link to={`/profile/${project.creator?._id}`} className="font-bold text-green-600 hover:underline">
-    @{project.creator?.username || 'Unknown'}
-</Link>
-                </p>
-                
-                {/* FOLLOW BUTTON LOGIC */}
+      {/* Header Row */}
+      <div className="flex justify-between items-start mb-2">
+        
+        {/* LEFT: Title & Creator */}
+        <div className="w-3/4"> {/* Limit width so it doesn't hit the heart */}
+            <h3 className="text-2xl font-bold text-gray-800 leading-tight">{project.title}</h3>
+            <div className="flex items-center gap-2 mt-1">
+                <Link to={`/profile/${project.creator?._id}`} className="text-sm font-bold text-green-600 hover:underline">
+                   @{project.creator?.username || 'Unknown'}
+                </Link>
+                {/* Follow Button Logic Here (Keep your existing button code) */}
                 {!isMyProject && (
                     <button 
                         onClick={handleFollow}
-                        className={`text-xs px-2 py-1 rounded font-bold transition ${
+                        className={`text-xs px-2 py-0.5 rounded font-bold transition border ${
                             followed 
-                            ? "bg-gray-200 text-gray-600 hover:bg-red-100 hover:text-red-500" 
-                            : "bg-blue-100 text-blue-600 hover:bg-blue-200"
+                            ? "bg-white text-gray-500 border-gray-300 hover:bg-red-50 hover:text-red-500 hover:border-red-200" 
+                            : "bg-green-50 text-green-600 border-green-200 hover:bg-green-100"
                         }`}
                     >
                         {followed ? "Unfollow" : "+ Follow"}
@@ -115,12 +150,31 @@ const ProjectCard = ({ project }) => {
                 )}
             </div>
         </div>
-        <span className="text-xs text-gray-400">
-            {new Date(project.createdAt).toLocaleDateString()}
-        </span>
+
+        {/* RIGHT: Date & Like Button */}
+        <div className="flex flex-col items-end">
+            <span className="text-xs text-gray-400 mb-2">
+                {new Date(project.createdAt).toLocaleDateString()}
+            </span>
+            
+            <button 
+                onClick={handleLike}
+                className="flex items-center gap-1 group"
+            >
+                <span className={`text-2xl transition-transform group-active:scale-125 ${isLiked ? "text-red-500" : "text-gray-400 hover:text-red-300"}`}>
+                    {isLiked ? "❤️" : "🤍"}
+                </span>
+                {likes.length > 0 && (
+                    <span className="text-sm font-bold text-gray-500">{likes.length}</span>
+                )}
+            </button>
+        </div>
+
       </div>
 
-      <p className="text-gray-700 mb-4 mt-2">{project.description}</p>
+      <div className="mb-4 mt-2">
+    <CodeBlock text={project.description} />
+</div>
 
       <div className="flex gap-2 mb-4 flex-wrap">
         {project.tags.map((tag, index) => (

@@ -68,6 +68,9 @@ const Dashboard = () => {
               name="description" value={newProject.description} onChange={handleChange}
               placeholder="Description" className="border p-2 rounded focus:ring-2 focus:ring-green-500 outline-none h-24" required 
             />
+            <p className="text-xs text-gray-400 mt-1 mb-3">
+  Tip: Use <b>```</b> to highlight code blocks (e.g., ```console.log('Hi')```)
+</p>
             <input 
               name="tags" value={newProject.tags} onChange={handleChange}
               placeholder="Tags (e.g. React, API)" className="border p-2 rounded outline-none" 
