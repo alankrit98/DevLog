@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Project = require('../models/Project');
+const sendNotification = require('../utils/notificationHelper');
 
 // @desc    Follow a user
 // @route   PUT /api/users/follow/:id
@@ -18,6 +19,12 @@ const followUser = async (req, res) => {
             await currentUser.updateOne({ $push: { following: req.params.id } });
             // Add to 'followers' list of target user
             await targetUser.updateOne({ $push: { followers: req.user.id } });
+
+            await sendNotification(req.io, {
+        recipient: req.params.id, // The target user
+        sender: req.user.id,
+        type: 'follow'
+    });
             
             res.status(200).json({ message: "User followed" });
         } else {

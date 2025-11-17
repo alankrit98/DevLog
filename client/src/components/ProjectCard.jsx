@@ -123,6 +123,21 @@ const ProjectCard = ({ project }) => {
   // Don't show follow button if it's my own project
   const isMyProject = currentUser?._id === project.creator._id;
 
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to delete this project? This cannot be undone.")) {
+      try {
+        await axios.delete(`http://localhost:5000/api/projects/${project._id}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        // Refresh the page to show the project is gone
+        window.location.reload(); 
+      } catch (error) {
+        console.error(error);
+        alert("Error deleting project");
+      }
+    }
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-6 hover:shadow-lg transition border-l-4 border-green-500">
       {/* Header Row */}
@@ -130,7 +145,19 @@ const ProjectCard = ({ project }) => {
         
         {/* LEFT: Title & Creator */}
         <div className="w-3/4"> {/* Limit width so it doesn't hit the heart */}
+        <div className="flex items-center gap-3">
             <h3 className="text-2xl font-bold text-gray-800 leading-tight">{project.title}</h3>
+            {/* DELETE BUTTON (Only visible if it's my project) */}
+                {isMyProject && (
+                    <button 
+                        onClick={handleDelete}
+                        className="text-gray-400 hover:text-red-600 transition"
+                        title="Delete Project"
+                    >
+                        🗑️
+                    </button>
+                )}
+            </div>
             <div className="flex items-center gap-2 mt-1">
                 <Link to={`/profile/${project.creator?._id}`} className="text-sm font-bold text-green-600 hover:underline">
                    @{project.creator?.username || 'Unknown'}

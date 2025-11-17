@@ -35,6 +35,11 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/comments', commentRoutes);
+app.use((req, res, next) => {
+    req.io = io;
+    next();
+});
+app.use('/api/notifications', require('./routes/notificationRoutes'));
 
 // --- SOCKET.IO LOGIC ---
 io.on('connection', (socket) => {

@@ -1,4 +1,5 @@
 const Project = require('../models/Project');
+const sendNotification = require('../utils/notificationHelper');
 
 // @desc    Create a new project
 // @route   POST /api/projects
@@ -26,12 +27,27 @@ const createProject = async (req, res) => {
 // @route   GET /api/projects
 // @access  Public
 const getProjects = async (req, res) => {
-    // .populate() replaces the ID with the actual User data (username, avatar)
-    const projects = await Project.find()
-        .populate('creator', 'username avatar')
-        .sort({ createdAt: -1 }); // Newest first
+    try {
+        // 1. Check if there is a search query (e.g., ?search=react)
+        const keyword = req.query.search
+            ? {
+                $or: [
+                    { title: { $regex: req.query.search, $options: 'i' } },       // Search Title (Case insensitive)
+                    { tags: { $regex: req.query.search, $options: 'i' } },        // Search Tags
+                    { description: { $regex: req.query.search, $options: 'i' } }, // Search Description
+                ],
+            }
+            : {}; // If no search, find everything ({})
 
-    res.json(projects);
+        // 2. Fetch projects matching the keyword
+        const projects = await Project.find({ ...keyword })
+            .populate('creator', 'username avatar')
+            .sort({ createdAt: -1 });
+
+        res.json(projects);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
 };
 
 // @desc    Like or Unlike a project
@@ -55,6 +71,12 @@ const likeProject = async (req, res) => {
         } else {
             // Like: Add user to likes array
             project.likes.push(req.user.id);
+            await sendNotification(req.io, {
+        recipient: project.creator,
+        sender: req.user.id,
+        type: 'like',
+        project: project._id
+    });
         }
 
         await project.save();
@@ -64,4 +86,27 @@ const likeProject = async (req, res) => {
     }
 };
 
-module.exports = { createProject, getProjects, likeProject };
+// @desc    Delete a project
+// @route   DELETE /api/projects/:id
+// @access  Private
+const deleteProject = async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.id);
+
+        if (!project) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+
+        // Check ownership: Ensure the logged-in user is the creator
+        if (project.creator.toString() !== req.user.id) {
+            return res.status(401).json({ message: 'Not authorized to delete this project' });
+        }
+
+        await project.deleteOne();
+        res.json({ message: 'Project removed' });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { createProject, getProjects, likeProject, deleteProject };

@@ -5,6 +5,7 @@ import ProjectCard from '../components/ProjectCard'; // Import the card we just 
 
 const Dashboard = () => {
   const [projects, setProjects] = useState([]);
+  const [search, setSearch] = useState("");
   const [newProject, setNewProject] = useState({ title: '', description: '', githubLink: '', liveLink: '', tags: '' });
   const navigate = useNavigate();
   
@@ -18,9 +19,14 @@ const Dashboard = () => {
     fetchProjects();
   }, []);
 
-  const fetchProjects = async () => {
+  const fetchProjects = async (query = "") => {
     try {
-      const res = await axios.get('http://localhost:5000/api/projects');
+      // If query exists, append it to URL. Otherwise fetch all.
+      const url = query 
+        ? `http://localhost:5000/api/projects?search=${query}` 
+        : 'http://localhost:5000/api/projects';
+      
+      const res = await axios.get(url);
       setProjects(res.data);
     } catch (error) {
       console.error("Error fetching projects", error);
@@ -50,6 +56,12 @@ const Dashboard = () => {
       console.error(error);
       alert('Failed to post project');
     }
+  };
+
+  // 4. Handle Search
+  const handleSearch = (e) => {
+    e.preventDefault();
+    fetchProjects(search); // Call fetch with the current search text
   };
 
   return (
@@ -92,7 +104,38 @@ const Dashboard = () => {
 
       {/* RIGHT COLUMN: Feed */}
       <div className="md:col-span-2">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Community Feed</h2>
+        <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        <h2 className="text-2xl font-bold text-gray-800">Community Feed</h2>
+        
+        <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto">
+            <input 
+                type="text" 
+                placeholder="Search projects, tags..." 
+                value={search}
+                onChange={(e) => {
+        setSearch(e.target.value);
+        // If user clears the box, reset the feed automatically
+        if(e.target.value === "") {
+            fetchProjects("");
+        }
+    }}
+                className="border p-2 rounded-l focus:outline-none focus:ring-2 focus:ring-green-500 w-full md:w-64"
+            />
+            <button type="submit" className="bg-gray-900 text-white px-4 py-2 rounded-r hover:bg-gray-700">
+                Search
+            </button>
+            {/* Reset Button */}
+            {search && (
+                <button 
+                    type="button" 
+                    onClick={() => { setSearch(""); fetchProjects(""); }}
+                    className="text-gray-500 hover:text-red-500 text-sm font-bold px-2"
+                >
+                    Clear
+                </button>
+            )}
+        </form>
+      </div>
         {projects.length > 0 ? (
             projects.map((p) => <ProjectCard key={p._id} project={p} />)
         ) : (
