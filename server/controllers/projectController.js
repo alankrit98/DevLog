@@ -109,4 +109,38 @@ const deleteProject = async (req, res) => {
     }
 };
 
-module.exports = { createProject, getProjects, likeProject, deleteProject };
+// @desc    Update a project
+// @route   PUT /api/projects/:id
+// @access  Private
+const updateProject = async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.id);
+
+        if (!project) {
+            return res.status(404).json({ message: 'Project not found' });
+        }
+
+        // Check ownership
+        if (project.creator.toString() !== req.user.id) {
+            return res.status(401).json({ message: 'Not authorized' });
+        }
+
+        // Update fields if they exist in the request
+        project.title = req.body.title || project.title;
+        project.description = req.body.description || project.description;
+        project.tags = req.body.tags ? req.body.tags.split(',').map(tag => tag.trim()) : project.tags;
+        project.githubLink = req.body.githubLink || project.githubLink;
+        project.liveLink = req.body.liveLink || project.liveLink;
+
+        const updatedProject = await project.save();
+        
+        // We populate creator so the frontend doesn't lose the user avatar after update
+        await updatedProject.populate('creator', 'username avatar');
+        
+        res.json(updatedProject);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { createProject, getProjects, likeProject, deleteProject, updateProject };

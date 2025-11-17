@@ -13,6 +13,15 @@ const ProjectCard = ({ project }) => {
   const isFollowingInitially = currentUser?.following?.includes(project.creator._id);
   const [followed, setFollowed] = useState(isFollowingInitially);
 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({
+    title: project.title,
+    description: project.description,
+    tags: project.tags.join(', '),
+    githubLink: project.githubLink,
+    liveLink: project.liveLink
+  });
+
   // --- LIKE LOGIC ---
   //  State for likes count and status
   const [likes, setLikes] = useState(project.likes || []);
@@ -138,6 +147,23 @@ const ProjectCard = ({ project }) => {
     }
   };
 
+  const handleUpdate = async () => {
+    try {
+        const res = await axios.put(`http://localhost:5000/api/projects/${project._id}`, editData, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        
+        // UI Trick: We don't need to reload the page!
+        // We can just turn off edit mode. The parent component won't update automatically 
+        // without a state lift, but for now, a reload is safer to sync everything.
+        setIsEditing(false);
+        window.location.reload(); 
+    } catch (error) {
+        console.error(error);
+        alert("Error updating project");
+    }
+  };
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-md mb-6 hover:shadow-lg transition border-l-4 border-green-500">
       {/* Header Row */}
@@ -145,19 +171,41 @@ const ProjectCard = ({ project }) => {
         
         {/* LEFT: Title & Creator */}
         <div className="w-3/4"> {/* Limit width so it doesn't hit the heart */}
-        <div className="flex items-center gap-3">
-            <h3 className="text-2xl font-bold text-gray-800 leading-tight">{project.title}</h3>
-            {/* DELETE BUTTON (Only visible if it's my project) */}
-                {isMyProject && (
-                    <button 
-                        onClick={handleDelete}
-                        className="text-gray-400 hover:text-red-600 transition"
-                        title="Delete Project"
-                    >
-                        🗑️
-                    </button>
-                )}
-            </div>
+        {isEditing ? (
+                // --- EDIT MODE ---
+                <div className="flex flex-col gap-2 mb-2">
+                    <input 
+                        value={editData.title}
+                        onChange={(e) => setEditData({...editData, title: e.target.value})}
+                        className="border p-1 rounded text-xl font-bold w-full"
+                    />
+                </div>
+            ) : (
+                // --- VIEW MODE ---
+                <div className="flex items-center gap-3">
+                    <h3 className="text-2xl font-bold text-gray-800 leading-tight">{project.title}</h3>
+                    
+                    {/* ACTION BUTTONS (Edit/Delete) */}
+                    {isMyProject && (
+                        <div className="flex gap-2">
+                             <button 
+                                onClick={() => setIsEditing(true)}
+                                className="text-gray-400 hover:text-blue-600 transition"
+                                title="Edit Project"
+                            >
+                                ✏️
+                            </button>
+                            <button 
+                                onClick={handleDelete}
+                                className="text-gray-400 hover:text-red-600 transition"
+                                title="Delete Project"
+                            >
+                                🗑️
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
             <div className="flex items-center gap-2 mt-1">
                 <Link to={`/profile/${project.creator?._id}`} className="text-sm font-bold text-green-600 hover:underline">
                    @{project.creator?.username || 'Unknown'}
@@ -199,30 +247,69 @@ const ProjectCard = ({ project }) => {
 
       </div>
 
-      <div className="mb-4 mt-2">
-    <CodeBlock text={project.description} />
-</div>
+      {/* BODY */}
+      {isEditing ? (
+        // --- EDIT FORM ---
+        <div className="mt-4 flex flex-col gap-2">
+            <textarea 
+                value={editData.description}
+                onChange={(e) => setEditData({...editData, description: e.target.value})}
+                className="border p-2 rounded w-full h-24"
+            />
+            <input 
+                value={editData.tags}
+                onChange={(e) => setEditData({...editData, tags: e.target.value})}
+                placeholder="Tags (comma separated)"
+                className="border p-2 rounded"
+            />
+            <div className="flex gap-2">
+                <input 
+                    value={editData.githubLink}
+                    onChange={(e) => setEditData({...editData, githubLink: e.target.value})}
+                    placeholder="GitHub URL"
+                    className="border p-2 rounded w-1/2"
+                />
+                <input 
+                    value={editData.liveLink}
+                    onChange={(e) => setEditData({...editData, liveLink: e.target.value})}
+                    placeholder="Live URL"
+                    className="border p-2 rounded w-1/2"
+                />
+            </div>
+            <div className="flex gap-2 mt-2">
+                <button onClick={handleUpdate} className="bg-green-500 text-white px-4 py-1 rounded font-bold">Save</button>
+                <button onClick={() => setIsEditing(false)} className="bg-gray-300 text-black px-4 py-1 rounded font-bold">Cancel</button>
+            </div>
+        </div>
+      ) : (
+        // --- VIEW DISPLAY ---
+        <>
+            <div className="mb-4 mt-2">
+                <CodeBlock text={project.description} />
+            </div>
 
-      <div className="flex gap-2 mb-4 flex-wrap">
-        {project.tags.map((tag, index) => (
-          <span key={index} className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded-full">
-            #{tag.trim()}
-          </span>
-        ))}
-      </div>
+            <div className="flex gap-2 mb-4 flex-wrap">
+                {project.tags.map((tag, index) => (
+                <span key={index} className="bg-gray-200 text-gray-800 text-xs px-2 py-1 rounded-full">
+                    #{tag.trim()}
+                </span>
+                ))}
+            </div>
 
-      <div className="flex gap-4 mt-4 border-t pt-4">
-        {project.githubLink && (
-            <a href={project.githubLink} target="_blank" rel="noreferrer" className="text-gray-900 hover:text-green-500 font-bold text-sm">
-                GitHub
-            </a>
-        )}
-        {project.liveLink && (
-            <a href={project.liveLink} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-800 font-bold text-sm">
-                Live Demo
-            </a>
-        )}
-      </div>
+            <div className="flex gap-4 mt-4 border-t pt-4">
+                {project.githubLink && (
+                    <a href={project.githubLink} target="_blank" rel="noreferrer" className="text-gray-900 hover:text-green-500 font-bold text-sm flex items-center gap-1">
+                        GitHub
+                    </a>
+                )}
+                {project.liveLink && (
+                    <a href={project.liveLink} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-800 font-bold text-sm">
+                        Live Demo ↗
+                    </a>
+                )}
+            </div>
+        </>
+      )}
 
       <div className="mt-4 pt-4 border-t">
         <button 
