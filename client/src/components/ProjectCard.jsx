@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { io } from 'socket.io-client';
+import { Link } from 'react-router-dom';
 
 const ProjectCard = ({ project }) => {
   // Get current user from local storage
@@ -94,7 +95,9 @@ const ProjectCard = ({ project }) => {
             <h3 className="text-2xl font-bold text-gray-800">{project.title}</h3>
             <div className="flex items-center gap-2 mb-2">
                 <p className="text-sm text-gray-500">
-                  by <span className="font-bold text-green-600">@{project.creator?.username || 'Unknown'}</span>
+                  by <Link to={`/profile/${project.creator?._id}`} className="font-bold text-green-600 hover:underline">
+    @{project.creator?.username || 'Unknown'}
+</Link>
                 </p>
                 
                 {/* FOLLOW BUTTON LOGIC */}

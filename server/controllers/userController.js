@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Project = require('../models/Project');
 
 // @desc    Follow a user
 // @route   PUT /api/users/follow/:id
@@ -52,4 +53,66 @@ const unfollowUser = async (req, res) => {
     }
 };
 
-module.exports = { followUser, unfollowUser };
+// @desc    Get user profile by ID
+// @route   GET /api/users/:id
+// @access  Public (Anyone can view a profile)
+const getUserProfile = async (req, res) => {
+    try {
+        // 1. Get the User Details (excluding password)
+        const user = await User.findById(req.params.id).select('-password');
+        
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        // 2. Get all Projects created by this user
+        const projects = await Project.find({ creator: req.params.id }).sort({ createdAt: -1 });
+
+        // 3. Return both
+        res.json({ user, projects });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// @desc    Update your own profile
+// @route   PUT /api/users/profile
+// @access  Private
+const updateUserProfile = async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (req.file) {
+    // Cloudinary puts the public URL directly in req.file.path
+    user.avatar = req.file.path; 
+} else if (req.body.avatarUrl) {
+    user.avatar = req.body.avatarUrl;
+}
+
+        if (user) {
+            user.username = req.body.username || user.username;
+            user.bio = req.body.bio || user.bio;
+            user.avatar = req.body.avatar || user.avatar;
+            
+            // specific logic for skills array
+            if (req.body.skills) {
+                user.skills = req.body.skills.split(',').map(skill => skill.trim());
+            }
+
+            const updatedUser = await user.save();
+            
+            res.json({
+                _id: updatedUser._id,
+                username: updatedUser.username,
+                email: updatedUser.email,
+                avatar: updatedUser.avatar,
+                bio: updatedUser.bio,
+                skills: updatedUser.skills,
+                token: req.headers.authorization.split(' ')[1] // Keep existing token
+            });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { followUser, unfollowUser, getUserProfile, updateUserProfile };

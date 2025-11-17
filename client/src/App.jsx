@@ -4,22 +4,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Chat from './pages/Chat';
-
-// Dashboard Component
-// const Dashboard = () => {
-//   const user = JSON.parse(localStorage.getItem('user'));
-  
-//   // Security check: If no user, kick them back to login
-//   if (!user) return <Navigate to="/login" />;
-
-//   return (
-//     <div className="p-10 text-gray-800"> {/* Added text color */}
-//       <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
-//       <p>Welcome back, <span className="font-bold text-green-600">{user.username}</span>!</p>
-//       {/* We will add the Project Form here soon */}
-//     </div>
-//   );
-// };
+import Profile from './pages/Profile';
 
 // Home Component
 const Home = () => {
@@ -48,6 +33,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/chat" element={<Chat />} />
+          <Route path="/profile/:id" element={<Profile />} />
         </Routes>
       </div>
     </BrowserRouter>

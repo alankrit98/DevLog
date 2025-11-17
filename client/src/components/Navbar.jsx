@@ -23,7 +23,9 @@ const Navbar = () => {
           {user ? (
             <>
               {/* Show this if user IS logged in */}
-              <span className="text-gray-300">Hello, {user.username}</span>
+              <Link to={`/profile/${user._id}`} className="text-gray-300 hover:text-white font-bold">
+  Hello, {user.username}
+</Link>
               <Link to="/dashboard" className="hover:text-green-400 transition">Dashboard</Link>
               <Link to="/chat" className="hover:text-green-400 transition">Chat</Link>
               <button 
