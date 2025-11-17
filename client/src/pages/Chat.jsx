@@ -16,7 +16,7 @@ const Chat = () => {
   // 1. Setup Socket Connection
   useEffect(() => {
     // Initialize Socket
-    socket.current = io("http://localhost:5000");
+    socket.current = io("https://devlog-245n.onrender.com");
 
     // Helper function to join room
     const joinRoom = () => {
@@ -50,7 +50,7 @@ const Chat = () => {
   // 2. Fetch Mutual Friends
   useEffect(() => {
     const fetchFriends = async () => {
-      const res = await axios.get("http://localhost:5000/api/chat/mutuals", {
+      const res = await axios.get("https://devlog-245n.onrender.com/api/chat/mutuals", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setFriends(res.data);
@@ -62,7 +62,7 @@ const Chat = () => {
   useEffect(() => {
     if (currentChat) {
       const fetchMessages = async () => {
-        const res = await axios.get(`http://localhost:5000/api/chat/${currentChat._id}`, {
+        const res = await axios.get(`https://devlog-245n.onrender.com/api/chat/${currentChat._id}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
         setMessages(res.data);
@@ -91,7 +91,7 @@ const Chat = () => {
     socket.current.emit("send_message", messageData);
 
     // Save to Database
-    await axios.post("http://localhost:5000/api/chat", messageData, {
+    await axios.post("https://devlog-245n.onrender.com/api/chat", messageData, {
         headers: { Authorization: `Bearer ${token}` },
     });
 

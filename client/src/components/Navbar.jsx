@@ -18,7 +18,7 @@ const Navbar = () => {
     if (!user) return;
 
     // Connect Socket
-    socket.current = io("http://localhost:5000");
+    socket.current = io("https://devlog-245n.onrender.com");
     socket.current.emit("join_user_room", user._id); // Ensure we join our private room
 
     // Listen for alerts
@@ -29,7 +29,7 @@ const Navbar = () => {
     // Fetch past notifications
     const fetchNotifications = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/notifications', {
+            const res = await axios.get('https://devlog-245n.onrender.com/api/notifications', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setNotifications(res.data);
@@ -52,7 +52,7 @@ const Navbar = () => {
 
   const handleMarkRead = async () => {
     if (unreadCount > 0) {
-        await axios.put('http://localhost:5000/api/notifications/read', {}, {
+        await axios.put('https://devlog-245n.onrender.com/api/notifications/read', {}, {
              headers: { Authorization: `Bearer ${token}` }
         });
         // Update local state

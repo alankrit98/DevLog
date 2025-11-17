@@ -14,7 +14,7 @@ const Register = () => {
     e.preventDefault();
     try {
       // Note: Ensure your backend is running on port 5000
-      await axios.post('http://localhost:5000/api/auth/register', formData);
+      await axios.post('https://devlog-245n.onrender.com/api/auth/register', formData);
       alert('Registration Successful! Please Login.');
       navigate('/login');
     } catch (error) {

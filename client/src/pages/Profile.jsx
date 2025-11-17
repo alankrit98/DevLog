@@ -23,7 +23,7 @@ const Profile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get(`http://localhost:5000/api/users/${id}`);
+        const res = await axios.get(`https://devlog-245n.onrender.com/api/users/${id}`);
         setProfile(res.data);
         // Pre-fill form data
         setEditFormData({
@@ -55,7 +55,7 @@ const Profile = () => {
     }
 
     try {
-        const res = await axios.put('http://localhost:5000/api/users/profile', formData, {
+        const res = await axios.put('https://devlog-245n.onrender.com/api/users/profile', formData, {
             headers: { 
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'multipart/form-data' // <--- Critical for files

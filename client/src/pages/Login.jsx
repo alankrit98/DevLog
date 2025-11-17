@@ -13,7 +13,7 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', formData);
+      const res = await axios.post('https://devlog-245n.onrender.com/api/auth/login', formData);
       
       // Save the Token and User info to LocalStorage
       localStorage.setItem('token', res.data.token);

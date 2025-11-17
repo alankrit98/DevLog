@@ -43,7 +43,7 @@ const ProjectCard = ({ project }) => {
     }
 
     try {
-        const res = await axios.put(`http://localhost:5000/api/projects/like/${project._id}`, {}, {
+        const res = await axios.put(`https://devlog-245n.onrender.com/api/projects/like/${project._id}`, {}, {
             headers: { Authorization: `Bearer ${token}` }
         });
         // Sync with server response to be safe
@@ -64,11 +64,11 @@ const ProjectCard = ({ project }) => {
 
   useEffect(() => {
     if (showChat) {
-      socket.current = io("http://localhost:5000");
+      socket.current = io("https://devlog-245n.onrender.com");
       socket.current.emit("join_project", project._id);
 
       // Load initial history
-      axios.get(`http://localhost:5000/api/comments/${project._id}`)
+      axios.get(`https://devlog-245n.onrender.com/api/comments/${project._id}`)
            .then(res => setComments(res.data));
 
       // Listen for real-time comments
@@ -96,7 +96,7 @@ const ProjectCard = ({ project }) => {
     socket.current.emit("send_comment", commentData);
 
     // 2. Save to DB
-    await axios.post('http://localhost:5000/api/comments', 
+    await axios.post('https://devlog-245n.onrender.com/api/comments', 
         { text: newComment, projectId: project._id },
         { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -109,12 +109,12 @@ const ProjectCard = ({ project }) => {
       const config = { headers: { Authorization: `Bearer ${token}` } };
       
       if (followed) {
-        await axios.put(`http://localhost:5000/api/users/unfollow/${project.creator._id}`, {}, config);
+        await axios.put(`https://devlog-245n.onrender.com/api/users/unfollow/${project.creator._id}`, {}, config);
         
         // Update LocalStorage so the UI stays consistent on refresh
         currentUser.following = currentUser.following.filter(id => id !== project.creator._id);
       } else {
-        await axios.put(`http://localhost:5000/api/users/follow/${project.creator._id}`, {}, config);
+        await axios.put(`https://devlog-245n.onrender.com/api/users/follow/${project.creator._id}`, {}, config);
         
         // Add to LocalStorage
         currentUser.following.push(project.creator._id);
@@ -135,7 +135,7 @@ const ProjectCard = ({ project }) => {
   const handleDelete = async () => {
     if (window.confirm("Are you sure you want to delete this project? This cannot be undone.")) {
       try {
-        await axios.delete(`http://localhost:5000/api/projects/${project._id}`, {
+        await axios.delete(`https://devlog-245n.onrender.com/api/projects/${project._id}`, {
           headers: { Authorization: `Bearer ${token}` }
         });
         // Refresh the page to show the project is gone
@@ -149,7 +149,7 @@ const ProjectCard = ({ project }) => {
 
   const handleUpdate = async () => {
     try {
-        const res = await axios.put(`http://localhost:5000/api/projects/${project._id}`, editData, {
+        const res = await axios.put(`https://devlog-245n.onrender.com/api/projects/${project._id}`, editData, {
             headers: { Authorization: `Bearer ${token}` }
         });
         

@@ -23,8 +23,8 @@ const Dashboard = () => {
     try {
       // If query exists, append it to URL. Otherwise fetch all.
       const url = query 
-        ? `http://localhost:5000/api/projects?search=${query}` 
-        : 'http://localhost:5000/api/projects';
+        ? `https://devlog-245n.onrender.com/api/projects?search=${query}` 
+        : 'https://devlog-245n.onrender.com/api/projects';
       
       const res = await axios.get(url);
       setProjects(res.data);
@@ -46,7 +46,7 @@ const Dashboard = () => {
         headers: { Authorization: `Bearer ${token}` }, // Attach Token!
       };
       
-      await axios.post('http://localhost:5000/api/projects', newProject, config);
+      await axios.post('https://devlog-245n.onrender.com/api/projects', newProject, config);
       
       // Refresh feed and clear form
       fetchProjects();
