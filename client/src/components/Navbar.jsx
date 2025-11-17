@@ -71,6 +71,10 @@ const Navbar = () => {
         <div className="flex gap-6 items-center">
           {user ? (
             <>
+              {/* 1. CHAT ICON (Added Back) */}
+              <Link to="/chat" className="text-2xl hover:text-green-400 transition" title="Messages">
+                Chat
+              </Link>
               {/* NOTIFICATION BELL */}
               <div className="relative">
                 <button onClick={handleMarkRead} className="relative text-2xl hover:text-gray-300 transition">
