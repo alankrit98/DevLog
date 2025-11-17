@@ -54,7 +54,7 @@
 
 ### 1. Clone the Repository
 ```
-git clone [https://github.com/yourusername/DevLog.git](https://github.com/yourusername/DevLog.git)
+git clone https://github.com/yourusername/DevLog.git
 cd DevLog
 ```
 
