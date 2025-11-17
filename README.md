@@ -92,21 +92,21 @@ npm run dev
 
 ## Future Enhancements
 These are the features planned for the next release:
-🌙 Dark Mode: System-wide dark theme toggle.
-📱 Mobile Responsiveness: PWA (Progressive Web App) support for mobile installation.
-📧 Email Notifications: Weekly digest of top projects and new followers.
-🏆 Gamification: Badges for top contributors and "Project of the Week."
-🔗 GitHub Integration: Automatically import repositories as projects.
+- **🌙 Dark Mode:** System-wide dark theme toggle.
+- **📱 Mobile Responsiveness:** PWA (Progressive Web App) support for mobile installation.
+- **📧 Email Notifications:** Weekly digest of top projects and new followers.
+- **🏆 Gamification:** Badges for top contributors and "Project of the Week."
+- **🔗 GitHub Integration:** Automatically import repositories as projects.
 
 ---
 
 ## 🤝 Contributing
-Contributions are welcome! Please fork the repo and create a pull request.
-Fork the Project
-Create your Feature Branch (git checkout -b feature/AmazingFeature)
-Commit your Changes (git commit -m 'Add some AmazingFeature')
-Push to the Branch (git push origin feature/AmazingFeature)
-Open a Pull Request
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
 ---
 
