@@ -79,25 +79,31 @@ const getUserProfile = async (req, res) => {
 const updateUserProfile = async (req, res) => {
     try {
         const user = await User.findById(req.user.id);
-        if (req.file) {
-    // Cloudinary puts the public URL directly in req.file.path
-    user.avatar = req.file.path; 
-} else if (req.body.avatarUrl) {
-    user.avatar = req.body.avatarUrl;
-}
 
         if (user) {
+            // 1. Handle Text Fields
             user.username = req.body.username || user.username;
             user.bio = req.body.bio || user.bio;
-            user.avatar = req.body.avatar || user.avatar;
-            
-            // specific logic for skills array
+
+            // 2. Handle Skills
             if (req.body.skills) {
                 user.skills = req.body.skills.split(',').map(skill => skill.trim());
             }
 
-            const updatedUser = await user.save();
+            // 3. Handle Avatar (Prioritize File Upload -> then Link -> then keep existing)
+            if (req.file) {
+                // Cloudinary URL from the upload middleware
+                user.avatar = req.file.path; 
+            } else if (req.body.avatarUrl) {
+                // If user pasted a link in the text box
+                user.avatar = req.body.avatarUrl;
+            }
             
+            // Note: We removed the line "user.avatar = req.body.avatar || user.avatar" 
+            // because it was redundant and could accidentally overwrite the file upload.
+
+            const updatedUser = await user.save();
+
             res.json({
                 _id: updatedUser._id,
                 username: updatedUser.username,
@@ -105,7 +111,7 @@ const updateUserProfile = async (req, res) => {
                 avatar: updatedUser.avatar,
                 bio: updatedUser.bio,
                 skills: updatedUser.skills,
-                token: req.headers.authorization.split(' ')[1] // Keep existing token
+                token: req.headers.authorization.split(' ')[1]
             });
         } else {
             res.status(404).json({ message: 'User not found' });
